@@ -65,35 +65,31 @@ class DQNSolver:
             self.exploration_rate = 0.0
 
 
-def cartpole():
-    observation_space = env.observation_space.shape[0]
-    action_space = env.action_space.n
-    dqn_solver = DQNSolver(observation_space, action_space)
-    episode = 0
-    if load_filename is not None:
-        dqn_solver.model.load_state_dict(torch.load(os.path.join(directory, load_filename)))
-        episode = int(load_filename[11:-4])
-        print('Resuming training from checkpoint \'{}\'.'.format(load_filename))
+observation_space = env.observation_space.shape[0]
+action_space = env.action_space.n
+dqn_solver = DQNSolver(observation_space, action_space)
+episode = 0
+if load_filename is not None:
+    dqn_solver.model.load_state_dict(torch.load(os.path.join(directory, load_filename)))
+    episode = int(load_filename[11:-4])
+    print('Resuming training from checkpoint \'{}\'.'.format(load_filename))
+while True:
+    episode += 1
+    state = env.reset()
+    state = np.reshape(state, [1, observation_space])
+    episode_reward = 0
     while True:
-        episode += 1
-        state = env.reset()
-        state = np.reshape(state, [1, observation_space])
-        episode_reward = 0
-        while True:
-            env.render()
-            action = dqn_solver.act(state)
-            state_next, reward, terminal, info = env.step(action)
-            episode_reward += reward
-            state_next = np.reshape(state_next, [1, observation_space])
-            dqn_solver.remember(state, action, reward, state_next, terminal)
-            state = state_next
-            if terminal:
-                print("Run: " + str(episode) + ", exploration: " + str(dqn_solver.exploration_rate)
-                      + ", total reward: " + str(episode_reward), ", last reward: " + str(reward))
-                filename = os.path.join(directory, 'checkpoint_{}.pth'.format(episode))
-                torch.save(dqn_solver.model.state_dict(), f=filename)
-                break
-            dqn_solver.experience_replay()
-
-
-cartpole()
+        env.render()
+        action = dqn_solver.act(state)
+        state_next, reward, terminal, info = env.step(action)
+        episode_reward += reward
+        state_next = np.reshape(state_next, [1, observation_space])
+        dqn_solver.remember(state, action, reward, state_next, terminal)
+        state = state_next
+        if terminal:
+            print("Run: " + str(episode) + ", exploration: " + str(dqn_solver.exploration_rate)
+                  + ", total reward: " + str(episode_reward), ", last reward: " + str(reward))
+            filename = os.path.join(directory, 'checkpoint_{}.pth'.format(episode))
+            torch.save(dqn_solver.model.state_dict(), f=filename)
+            break
+        dqn_solver.experience_replay()
