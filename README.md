@@ -1,5 +1,9 @@
 # Reinforcement Learning Examples
 
+[![medium](https://aleen42.github.io/badges/src/medium.svg)](https://dredwardhyde.medium.com/a-simple-guide-to-reinforcement-learning-with-the-super-mario-bros-environment-495a13974a54)
+![Python3.8.6](https://img.shields.io/badge/Python-3.8.6-blue.svg)
+![PyTorch1.8.1](https://img.shields.io/badge/PyTorch-1.8.1-yellow.svg)
+
 ## Pong environment  
 ![Animation](https://github.com/dredwardhyde/reinforcement-learning/blob/main/pong_enviroment/pong_pg/pong_pg.gif)  
 
