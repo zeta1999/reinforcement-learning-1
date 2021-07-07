@@ -7,12 +7,12 @@ import numpy as np
 import torch
 from torch import nn, optim
 
-GAMMA = 0.99
-LEARNING_RATE = 1e-4
-MEMORY_SIZE = 1000000
-BATCH_SIZE = 40
-EXPLORATION_MAX = 1.0
-EXPLORATION_DECAY = 0.9995
+gamma = 0.99
+learning_rate = 1e-4
+memory_size = 1000000
+batch_size = 40
+exploration_max = 1.0
+exploration_decay = 0.9995
 
 env = gym.make("LunarLander-v2")
 random.seed(42)
@@ -24,16 +24,16 @@ load_filename = 'checkpoint_1080.pth'
 
 class DQNSolver:
     def __init__(self, observation_space, action_space):
-        self.exploration_rate = EXPLORATION_MAX
+        self.exploration_rate = exploration_max
         self.action_space = action_space
-        self.memory = deque(maxlen=MEMORY_SIZE)
+        self.memory = deque(maxlen=memory_size)
         self.model = torch.nn.Sequential(
             nn.Linear(observation_space, 256, bias=False),
             nn.ReLU(),
             nn.Linear(256, action_space, bias=False),
             nn.ReLU()
         )
-        self.optimizer = optim.Adam(self.model.parameters(), lr=LEARNING_RATE, eps=1e-4)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate, eps=1e-4)
         self.loss = nn.MSELoss()
 
     def remember(self, state, action, reward, next_state, done):
@@ -46,13 +46,13 @@ class DQNSolver:
         return np.argmax(q_values.detach().numpy()[0])
 
     def experience_replay(self):
-        if len(self.memory) < BATCH_SIZE:
+        if len(self.memory) < batch_size:
             return
-        batch = random.sample(self.memory, BATCH_SIZE)
+        batch = random.sample(self.memory, batch_size)
         for state, action, reward, state_next, terminal in batch:
             q_update = reward
             if not terminal:
-                q_update = (reward + GAMMA * np.max(self.model(torch.from_numpy(state_next).type(torch.FloatTensor)).detach().numpy()[0]))
+                q_update = (reward + gamma * np.max(self.model(torch.from_numpy(state_next).type(torch.FloatTensor)).detach().numpy()[0]))
             q_values = self.model(torch.from_numpy(state).type(torch.FloatTensor))
             q_values_target = torch.clone(q_values)
             q_values_target[0][action] = q_update
@@ -60,7 +60,7 @@ class DQNSolver:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-        self.exploration_rate *= EXPLORATION_DECAY
+        self.exploration_rate *= exploration_decay
         if self.exploration_rate < 1e-3:
             self.exploration_rate = 0.0
 
